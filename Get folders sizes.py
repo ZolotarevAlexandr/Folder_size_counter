@@ -37,6 +37,10 @@ def main():
             print(f'Exception ({e}) occurred on file {item}')
         print(f'Progress: {round((index / all_dirs_len) * 100)}%')
 
+    print()
+    print('-' * 30)
+    print()
+
     result = sorted(result, key=lambda x: (sizes_types.index(x[1][1]), x[1][0]), reverse=True)
     for i, item in enumerate(result):
         print(f'{item[0]} - {item[1][0]}{item[1][1]}')
