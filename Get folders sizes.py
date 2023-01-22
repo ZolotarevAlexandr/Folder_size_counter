@@ -23,15 +23,16 @@ def get_folder_size(name):
 
 def main():
     sizes_types = ['Б', 'КБ', 'МБ', 'ГБ']
+    directory = input('Input path to directory ("." for current): ')
 
     result = []
-    all_dirs_len = len(os.listdir())
-    for index, item in enumerate(os.listdir()):
+    all_dirs_len = len(os.listdir(directory))
+    for index, item in enumerate(os.listdir(directory)):
         try:
             if os.path.isfile(item):
-                result.append((item, human_read_format(os.path.getsize(item))))
+                result.append((item, human_read_format(os.path.getsize(f'{directory}\\{item}'))))
             else:
-                result.append((item, human_read_format(get_folder_size(item))))
+                result.append((item, human_read_format(get_folder_size(f'{directory}\\{item}'))))
         except Exception as e:
             print(f'Exception ({e}) occurred on file {item}')
         print(f'Progress: {round((index / all_dirs_len) * 100)}%')
