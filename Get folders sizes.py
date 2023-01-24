@@ -1,10 +1,11 @@
 import os
+from tqdm import tqdm
+
+sizes_types = ['Б', 'КБ', 'МБ', 'ГБ', 'ТБ']
 
 
 def human_read_format(size):
-    sizes_types = ['Б', 'КБ', 'МБ', 'ГБ']
     counter = 0
-
     while size >= 1024:
         size = size / 1024
         counter += 1
@@ -22,20 +23,21 @@ def get_folder_size(name):
 
 
 def main():
-    sizes_types = ['Б', 'КБ', 'МБ', 'ГБ']
-    directory = input('Input path to directory ("." for current): ')
+    directory = input('Input path to directory: ')
 
     result = []
-    all_dirs_len = len(os.listdir(directory))
-    for index, item in enumerate(os.listdir(directory)):
+    errors = []
+    for index, item in enumerate(tqdm(os.listdir(directory), unit=' folders')):
         try:
             if os.path.isfile(item):
                 result.append((item, human_read_format(os.path.getsize(f'{directory}\\{item}'))))
             else:
                 result.append((item, human_read_format(get_folder_size(f'{directory}\\{item}'))))
         except Exception as e:
-            print(f'Exception ({e}) occurred on file {item}')
-        print(f'Progress: {round((index / all_dirs_len) * 100)}%')
+            errors.append(f'Exception ({e}) occurred on file {item}')
+    if errors:
+        print('Following errors have occurred: ')
+        print('\n'.join(errors))
 
     print()
     print('-' * 30)
@@ -43,7 +45,7 @@ def main():
 
     result = sorted(result, key=lambda x: (sizes_types.index(x[1][1]), x[1][0]), reverse=True)
     for i, item in enumerate(result):
-        print(f'{item[0]} - {item[1][0]}{item[1][1]}')
+        print(f'{item[0]} - {item[1][0]} {item[1][1]}')
 
 
 if __name__ == '__main__':
@@ -51,4 +53,6 @@ if __name__ == '__main__':
         main()
     except Exception as e:
         print(f'Exception ({e}) occurred')
+
+    print()
     input('Press any button to exit')
