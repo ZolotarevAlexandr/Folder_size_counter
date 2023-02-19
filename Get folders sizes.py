@@ -47,12 +47,14 @@ def main():
     for i, item in enumerate(result):
         print(f'{item[0]} - {item[1][0]} {item[1][1]}')
 
+    print()
+    print('-' * 30)
+    print()
+
 
 if __name__ == '__main__':
-    try:
-        main()
-    except Exception as e:
-        print(f'Exception ({e}) occurred')
-
-    print()
-    input('Press any button to exit')
+    while True:
+        try:
+            main()
+        except Exception as e:
+            print(f'Exception ({e}) occurred')
