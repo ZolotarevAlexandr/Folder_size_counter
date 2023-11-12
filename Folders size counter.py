@@ -1,24 +1,36 @@
 import os
 from tqdm import tqdm
 
-sizes_types = ['Б', 'КБ', 'МБ', 'ГБ', 'ТБ']
+
+def print_indent() -> None:
+    print()
+    print('-' * 30)
+    print()
 
 
-def human_read_format(size: int) -> tuple[int, str]:
+# Returns folder size in more convenient format
+def human_read_format(size: int) -> dict:
+    sizes_types = ['Б', 'КБ', 'МБ', 'ГБ', 'ТБ']
     counter = 0
+
     while size >= 1024:
         size = size / 1024
         counter += 1
 
-    return round(size, 2), sizes_types[counter]
+    return {'size': round(size, 2), 'size_type': sizes_types[counter]}
 
 
-def get_folder_size(name: str) -> int:
+# Returns a folder size in bytes
+def get_folder_size(folder_name: str) -> int:
     folder_size = 0
-    for path, dirs, files in os.walk(name):
-        for f in files:
-            fp = os.path.join(path, f)
-            folder_size += os.path.getsize(fp)
+
+    # Going through every file in directory using os.walk, counting folder size by adding each file
+    # size (rather slow, but reliable way)
+    for path, dirs, files in os.walk(folder_name):
+        for file in files:
+            file_path = os.path.join(path, file)
+            folder_size += os.path.getsize(file_path)
+
     return folder_size
 
 
@@ -27,30 +39,35 @@ def main() -> None:
 
     result = []
     errors = []
-    for index, item in enumerate(tqdm(os.listdir(directory), unit=' folders')):
+
+    # Going through each file and folder using os.listdir. tqdm is just a progressbar
+    for item in tqdm(os.listdir(directory), unit=' folders'):
         try:
-            if os.path.isfile(item):
-                result.append((item, human_read_format(os.path.getsize(rf'{directory}\{item}'))))
+            item_path = rf'{directory}\{item}'
+            # Since get_folder_size can only count size of folders, counting size of files separately
+            if os.path.isfile(item_path):
+                result.append({'item': item, 'size': os.path.getsize(item_path)})
             else:
-                result.append((item, human_read_format(get_folder_size(rf'{directory}\{item}'))))
+                result.append({'item': item, 'size': get_folder_size(item_path)})
         except Exception as e:
-            errors.append(f'Exception ({e}) occurred on file {item}')
+            # Adding all errors in the list, so we can print them later
+            errors.append(f'Exception ({e}) occurred with file {item}')
+
     if errors:
         print()
         print('Following errors have occurred: ')
         print('\n'.join(errors))
 
-    print()
-    print('-' * 30)
-    print()
+    print_indent()
 
-    result = sorted(result, key=lambda x: (sizes_types.index(x[1][1]), x[1][0]), reverse=True)
+    # Sorting the result based in bytes size and that changing size to more readable format for output
+    result = sorted(result, key=lambda x: x['size'], reverse=True)
+    result = list(map(lambda x: {**x, 'size': human_read_format(x['size'])}, result))
+
     for item in result:
-        print(f'{item[0]} - {item[1][0]} {item[1][1]}')
+        print(f'{item["item"]} - {item["size"]["size"]} {item["size"]["size_type"]}')
 
-    print()
-    print('-' * 30)
-    print()
+    print_indent()
 
 
 if __name__ == '__main__':
@@ -58,7 +75,6 @@ if __name__ == '__main__':
         try:
             main()
         except Exception as e:
+            # Catching all exceptions from main, so app won't crash
             print(f'Exception ({e}) occurred')
-            print()
-            print('-' * 30)
-            print()
+            print_indent()
